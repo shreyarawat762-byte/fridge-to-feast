@@ -1,0 +1,243 @@
+:root {
+  --paper: #F7F5EF;
+  --ink: #1F2318;
+  --basil: #2F6E4E;
+  --tomato: #C1432E;
+  --butter: #E8B94A;
+  --line: #D8D2C2;
+  --card: #FFFFFF;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Nunito Sans', sans-serif;
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(31,35,24,0.03) 40px);
+}
+
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 32px 20px 60px;
+}
+
+/* ---- Masthead ---- */
+.masthead {
+  text-align: center;
+  margin-bottom: 28px;
+  position: relative;
+}
+
+.masthead h1 {
+  font-family: 'Archivo Black', sans-serif;
+  font-size: clamp(28px, 7vw, 44px);
+  letter-spacing: 1px;
+  margin: 0;
+  color: var(--ink);
+}
+
+.tagline {
+  font-family: 'Space Mono', monospace;
+  color: var(--basil);
+  margin-top: 6px;
+  font-size: 14px;
+}
+
+/* ---- Ticket (input section) ---- */
+.ticket {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 24px;
+  box-shadow: 0 2px 0 var(--line);
+  position: relative;
+}
+
+.ticket-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--tomato);
+  margin-bottom: 12px;
+}
+
+.chip-input {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  border-bottom: 2px dashed var(--line);
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--basil);
+  color: var(--paper);
+  padding: 6px 8px 6px 12px;
+  border-radius: 20px;
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+}
+
+.chip button {
+  background: none;
+  border: none;
+  color: var(--paper);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.chip-input input {
+  flex: 1;
+  min-width: 140px;
+  border: none;
+  outline: none;
+  font-family: 'Space Mono', monospace;
+  font-size: 14px;
+  padding: 8px 4px;
+  background: transparent;
+  color: var(--ink);
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.filters label {
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+  gap: 4px;
+}
+
+.filters select {
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 14px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.ring-up {
+  width: 100%;
+  background: var(--tomato);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 14px;
+  font-family: 'Archivo Black', sans-serif;
+  font-size: 15px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: transform 0.1s ease, background 0.2s ease;
+}
+
+.ring-up:hover:not(:disabled) { background: #a83a26; }
+.ring-up:active:not(:disabled) { transform: scale(0.98); }
+.ring-up:disabled { background: var(--line); cursor: not-allowed; }
+
+.error {
+  color: var(--tomato);
+  font-size: 13px;
+  margin-top: 10px;
+  font-family: 'Space Mono', monospace;
+}
+
+/* ---- Results ---- */
+.results {
+  margin-top: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.recipe-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 22px;
+  position: relative;
+  background-image: radial-gradient(circle, transparent 3px, var(--card) 3.5px);
+  background-size: 16px 16px;
+  background-position: -8px 0;
+}
+
+.stamp {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  border: 2px solid var(--basil);
+  color: var(--basil);
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  transform: rotate(6deg);
+  opacity: 0.7;
+}
+
+.recipe-card h2 {
+  font-family: 'Archivo Black', sans-serif;
+  font-size: 20px;
+  margin: 0 0 8px;
+  padding-right: 90px;
+  color: var(--ink);
+}
+
+.meta {
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  margin: 4px 0;
+  color: var(--ink);
+}
+
+.meta strong { color: var(--basil); }
+
+.desc {
+  margin: 12px 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.steps {
+  margin: 12px 0 0;
+  padding-left: 20px;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.skeleton {
+  color: var(--line);
+  font-family: 'Space Mono', monospace;
+  text-align: center;
+}
+
+.foot {
+  text-align: center;
+  margin-top: 48px;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--line);
+}
+
+@media (max-width: 480px) {
+  .filters { grid-template-columns: 1fr; }
+}
