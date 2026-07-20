@@ -74,7 +74,6 @@ function RecipeCard({ recipe, isFavorite, onToggleFavorite }) {
   return (
     <article className="recipe-card">
       <div className="card-image-wrap">
-        <RecipeImage seed={recipe.id} />
         <button
           className={`fav-btn ${isFavorite ? 'is-fav' : ''}`}
           onClick={() => onToggleFavorite(recipe)}
