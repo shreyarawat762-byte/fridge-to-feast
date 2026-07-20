@@ -7,12 +7,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-import anthropic
+import google.generativeai as genai
 
 app = FastAPI(title="Fridge to Feast API")
 
-# Allow the frontend to call the API during local dev.
-# In production the frontend is served by this same app, so CORS is a no-op there.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -20,7 +18,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
+model = genai.GenerativeModel("gemini-2.5-flash")
 
 
 class RecipeRequest(BaseModel):
@@ -78,14 +77,10 @@ async def get_recipes(req: RecipeRequest):
     prompt = build_prompt(req)
 
     def event_stream():
-        with client.messages.stream(
-            model="claude-sonnet-5",
-            max_tokens=2000,
-            messages=[{"role": "user", "content": prompt}],
-        ) as stream:
-            for text in stream.text_stream:
-                # Server-Sent Events format
-                yield f"data: {json.dumps({'text': text})}\n\n"
+        response = model.generate_content(prompt, stream=True)
+        for chunk in response:
+            if chunk.text:
+                yield f"data: {json.dumps({'text': chunk.text})}\n\n"
         yield "data: [DONE]\n\n"
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
@@ -96,8 +91,6 @@ async def health():
     return {"status": "ok"}
 
 
-# Serve the built React app (created by `npm run build` -> frontend/dist)
-# The Docker image copies that build output to /app/static
 static_dir = os.path.join(os.path.dirname(__file__), "static")
 if os.path.isdir(static_dir):
     app.mount("/", StaticFiles(directory=static_dir, html=True), name="static")
