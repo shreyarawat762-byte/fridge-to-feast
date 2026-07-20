@@ -41,47 +41,28 @@ function loadFavorites() {
   }
 }
 
-function RecipeImage({ seed }) {
-  const [src, setSrc] = useState('')
-  const [errored, setErrored] = useState(false)
-
-  useEffect(() => {
-    let cancelled = false
-
-    fetch('https://foodish-api.com/api/')
-      .then(res => res.json())
-      .then(data => {
-        if (!cancelled) setSrc(data.image)
-      })
-      .catch(() => {
-        if (!cancelled) setErrored(true)
-      })
-
-    return () => {
-      cancelled = true
-    }
-  }, [seed])
+function RecipeImage({ recipe }) {
+  const query = encodeURIComponent(recipe.title)
 
   return (
     <img
       className="card-image"
-      src={
-        errored
-          ? `https://picsum.photos/400/300?random=${seed}`
-          : src || `https://picsum.photos/400/300?random=${seed}`
-      }
-      alt="Recipe"
+      src={`https://loremflickr.com/600/400/${query}`}
+      alt={recipe.title}
       loading="lazy"
-      onError={() => setErrored(true)}
+      onError={(e) => {
+        e.target.src = `https://picsum.photos/600/400?random=${recipe.id}`
+      }}
     />
   )
-}function RecipeCard({ recipe, isFavorite, onToggleFavorite }) {
+}
+function RecipeCard({ recipe, isFavorite, onToggleFavorite }) {
   const [open, setOpen] = useState(false)
 
   return (
     <article className="recipe-card">
 <div className="card-image-wrap">
-  <RecipeImage seed={recipe.id} />
+  <RecipeImage recipe={recipe} />
   <button
           className={`fav-btn ${isFavorite ? 'is-fav' : ''}`}
           onClick={() => onToggleFavorite(recipe)}
