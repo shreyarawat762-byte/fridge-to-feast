@@ -5,8 +5,18 @@ const DIETS = ['None', 'Vegetarian', 'Vegan', 'Gluten-free', 'Dairy-free']
 const TIMES = ['Any', 'Under 20 min', 'Under 40 min']
 const MEAL_TYPES = ['Any', 'Breakfast', 'Lunch', 'Dinner', 'Snack']
 
-// Free, no-key food image API - returns a random food photo per call.
-const FOODISH_URL = 'https://foodish-api.com/api/'
+const FOOD_CATEGORIES = {
+  biryani: 81, burger: 87, 'butter-chicken': 22, dessert: 36,
+  dosa: 83, idly: 77, pasta: 34, pizza: 95, rice: 35, samosa: 22,
+}
+
+function imageUrlForSeed(seed) {
+  const keys = Object.keys(FOOD_CATEGORIES)
+  const cat = keys[seed % keys.length]
+  const count = FOOD_CATEGORIES[cat]
+  const n = (seed * 7 % count) + 1
+  return `https://foodish-api.com/images/${cat}/${cat}${n}.jpg`
+}
 
 function parseRecipes(rawText) {
   const blocks = rawText.split(/\n(?=## )/).filter(b => b.trim().startsWith('##'))
@@ -43,19 +53,20 @@ function loadFavorites() {
 }
 
 function RecipeImage({ seed }) {
-  const [src, setSrc] = useState(null)
+  const [errored, setErrored] = useState(false)
+  const src = errored
+    ? `https://picsum.photos/seed/food${seed}/400/300`
+    : imageUrlForSeed(seed)
 
-  useEffect(() => {
-    let cancelled = false
-    fetch(FOODISH_URL)
-      .then(r => r.json())
-      .then(data => { if (!cancelled) setSrc(data.image) })
-      .catch(() => {})
-    return () => { cancelled = true }
-  }, [seed])
-
-  if (!src) return <div className="card-image skeleton-image" />
-  return <img className="card-image" src={src} alt="" loading="lazy" />
+  return (
+    <img
+      className="card-image"
+      src={src}
+      alt=""
+      loading="lazy"
+      onError={() => setErrored(true)}
+    />
+  )
 }
 
 function RecipeCard({ recipe, isFavorite, onToggleFavorite }) {
@@ -101,7 +112,7 @@ function RecipeCard({ recipe, isFavorite, onToggleFavorite }) {
 export default function App() {
   const [name, setName] = useState(() => localStorage.getItem('ftf_name') || '')
   const [nameInput, setNameInput] = useState('')
-  const [view, setView] = useState('cook') // 'cook' | 'favorites'
+  const [view, setView] = useState('cook')
 
   const [ingredients, setIngredients] = useState([])
   const [inputValue, setInputValue] = useState('')
@@ -208,7 +219,6 @@ export default function App() {
   const recipes = parseRecipes(rawText)
   const favTitles = new Set(favorites.map(f => f.title))
 
-  // ---- Name gate ----
   if (!name) {
     return (
       <div className="gate">
