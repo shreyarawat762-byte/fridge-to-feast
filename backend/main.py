@@ -7,8 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-import google.generativeai as genai
-
+from groq import Groq
 app = FastAPI(title="Fridge to Feast API")
 
 app.add_middleware(
@@ -18,8 +17,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
-model = genai.GenerativeModel("gemini-flash-latest")
+client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+
 
 
 class RecipeRequest(BaseModel):
@@ -76,12 +75,22 @@ Do not include any text before the first "## " heading or after the final recipe
 async def get_recipes(req: RecipeRequest):
     prompt = build_prompt(req)
 
-    def event_stream():
-        response = model.generate_content(prompt, stream=True)
-        for chunk in response:
-            if chunk.text:
-                yield f"data: {json.dumps({'text': chunk.text})}\n\n"
-        yield "data: [DONE]\n\n"
+   def event_stream():
+    response = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=[
+            {
+                "role": "user",
+                "content": prompt,
+            }
+        ],
+        temperature=0.7,
+    )
+
+    text = response.choices[0].message.content
+
+    yield f"data: {json.dumps({'text': text})}\n\n"
+    yield "data: [DONE]\n\n"
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
 
