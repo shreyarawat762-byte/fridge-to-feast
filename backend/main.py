@@ -75,27 +75,27 @@ Do not include any text before the first "## " heading or after the final recipe
 async def get_recipes(req: RecipeRequest):
     prompt = build_prompt(req)
 
-   def event_stream():
-    response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=[
-            {
-                "role": "user",
-                "content": prompt,
-            }
-        ],
-        temperature=0.7,
-    )
+    def event_stream():
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt,
+                }
+            ],
+            temperature=0.7,
+        )
 
-    text = response.choices[0].message.content
+        text = response.choices[0].message.content
 
-    yield f"data: {json.dumps({'text': text})}\n\n"
-    yield "data: [DONE]\n\n"
+        yield f"data: {json.dumps({'text': text})}\n\n"
+        yield "data: [DONE]\n\n"
 
-    return StreamingResponse(event_stream(), media_type="text/event-stream")
-
-
-@app.get("/api/health")
+    return StreamingResponse(
+        event_stream(),
+        media_type="text/event-stream",
+    )@app.get("/api/health")
 async def health():
     return {"status": "ok"}
 
