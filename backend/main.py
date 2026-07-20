@@ -8,6 +8,7 @@ from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from groq import Groq
+
 app = FastAPI(title="Fridge to Feast API")
 
 app.add_middleware(
@@ -18,7 +19,6 @@ app.add_middleware(
 )
 
 client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
-
 
 
 class RecipeRequest(BaseModel):
@@ -76,26 +76,22 @@ async def get_recipes(req: RecipeRequest):
     prompt = build_prompt(req)
 
     def event_stream():
-        response = client.chat.completions.create(
+        stream = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
-            messages=[
-                {
-                    "role": "user",
-                    "content": prompt,
-                }
-            ],
+            messages=[{"role": "user", "content": prompt}],
             temperature=0.7,
+            stream=True,
         )
-
-        text = response.choices[0].message.content
-
-        yield f"data: {json.dumps({'text': text})}\n\n"
+        for chunk in stream:
+            delta = chunk.choices[0].delta.content
+            if delta:
+                yield f"data: {json.dumps({'text': delta})}\n\n"
         yield "data: [DONE]\n\n"
 
-    return StreamingResponse(
-        event_stream(),
-        media_type="text/event-stream",
-    )@app.get("/api/health")
+    return StreamingResponse(event_stream(), media_type="text/event-stream")
+
+
+@app.get("/api/health")
 async def health():
     return {"status": "ok"}
 
