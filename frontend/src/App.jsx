@@ -5,18 +5,7 @@ const DIETS = ['None', 'Vegetarian', 'Vegan', 'Gluten-free', 'Dairy-free']
 const TIMES = ['Any', 'Under 20 min', 'Under 40 min']
 const MEAL_TYPES = ['Any', 'Breakfast', 'Lunch', 'Dinner', 'Snack']
 
-const FOOD_CATEGORIES = {
-  biryani: 81, burger: 87, 'butter-chicken': 22, dessert: 36,
-  dosa: 83, idly: 77, pasta: 34, pizza: 95, rice: 35, samosa: 22,
-}
-
-function imageUrlForSeed(seed) {
-  const keys = Object.keys(FOOD_CATEGORIES)
-  const cat = keys[seed % keys.length]
-  const count = FOOD_CATEGORIES[cat]
-  const n = (seed * 7 % count) + 1
-  return `https://foodish-api.com/images/${cat}/${cat}${n}.jpg`
-}
+const FOODISH_URL = 'https://foodish-api.com/api/'
 
 function parseRecipes(rawText) {
   const blocks = rawText.split(/\n(?=## )/).filter(b => b.trim().startsWith('##'))
@@ -53,15 +42,25 @@ function loadFavorites() {
 }
 
 function RecipeImage({ seed }) {
+  const [src, setSrc] = useState(null)
   const [errored, setErrored] = useState(false)
-  const src = errored
-    ? `https://picsum.photos/seed/food${seed}/400/300`
-    : imageUrlForSeed(seed)
 
+  useEffect(() => {
+    let cancelled = false
+    fetch(FOODISH_URL)
+      .then(r => r.json())
+      .then(data => { if (!cancelled) setSrc(data.image) })
+      .catch(() => { if (!cancelled) setErrored(true) })
+    return () => { cancelled = true }
+  }, [seed])
+
+  const finalSrc = errored ? `https://picsum.photos/seed/food${seed}/400/300` : src
+
+  if (!finalSrc) return <div className="card-image skeleton-image" />
   return (
     <img
       className="card-image"
-      src={src}
+      src={finalSrc}
       alt=""
       loading="lazy"
       onError={() => setErrored(true)}
