@@ -28,12 +28,15 @@ class RecipeRequest(BaseModel):
     cuisine: Optional[str] = None
     diet: Optional[str] = None
     max_time: Optional[str] = None
+    meal_type: Optional[str] = None
 
 
 def build_prompt(req: RecipeRequest) -> str:
     ingredients_str = ", ".join(req.ingredients) if req.ingredients else "whatever is commonly on hand"
 
     constraints = []
+    if req.meal_type:
+        constraints.append(f"Meal type: {req.meal_type}.")
     if req.cuisine:
         constraints.append(f"Cuisine style: {req.cuisine}.")
     if req.diet:
@@ -76,7 +79,7 @@ async def get_recipes(req: RecipeRequest):
 
     def event_stream():
         with client.messages.stream(
-            model="claude-sonnet-5",
+            model="claude-sonnet-4-6",
             max_tokens=2000,
             messages=[{"role": "user", "content": prompt}],
         ) as stream:
