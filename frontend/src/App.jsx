@@ -344,7 +344,7 @@ export default function App() {
         </section>
       )}
 
-      <footer className="foot">Built with Claude · Fridge to Feast</footer>
+      <footer className="foot">Made by Shreya</footer>
     </div>
   )
 }
